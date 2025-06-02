@@ -147,22 +147,77 @@ Task* cariTugas(string id) {
 
 ////////////////////////////////////////////////////////////////////////////
 
-// mengupdate data tugas berdasarkan id
 void updateTugas() {
     cout << "Masukkan ID tugas yang ingin diupdate: ";
-    string id; cin >> id; // input id tugas
-    Task* t = cariTugas(id); // cari tugas berdasarkan id
-    // jika tugas tidak ditemukan, tampilkan pesan error
+    string id; cin >> id;
+    Task* t = cariTugas(id);
     if (!t) {
-        cout << "Tugas tidak ditemukan.\n"; 
+        cout << "Tugas tidak ditemukan.\n";
         return;
     }
-    // jika tugas ditemukan, tampilkan detail tugas dan minta input baru
+
+    // simpan pointer ke node yang akan diupdate
+    Task* curr = front;
+    Task* prev = nullptr;
+    while (curr && curr != t) {
+        prev = curr;
+        curr = curr->next;
+    }
+
+    // hapus node dari queue
+    if (!prev) front = curr->next;
+    else prev->next = curr->next;
+
+    // update data tugas
     cout << "Update Nama Tugas (sebelumnya: " << t->nama << "): "; getline(cin >> ws, t->nama);
     cout << "Update Prioritas (sebelumnya: " << t->prioritas << "): "; cin >> t->prioritas;
-    cout << "Update Deadline (sebelumnya: " << t->deadline << "): "; cin >> t->deadline;
+    string deadline;
+    do {
+        cout << "Update Deadline (sebelumnya: " << t->deadline << "): ";
+        cin >> deadline;
+        if (!validDeadline(deadline)) {
+            cout << "Format deadline salah! Masukkan ulang (YYYY-MM-DD, hanya angka, tidak negatif).\n";
+        }
+    } while (!validDeadline(deadline));
+    t->deadline = deadline;
     cout << "Update Deskripsi (sebelumnya: " << t->deskripsi << "): "; getline(cin >> ws, t->deskripsi);
-    cout << "Update Kategori (sebelumnya: " << t->kategori << "): "; getline(cin >> ws, t->kategori);
+
+    int pilihKategori;
+    cout << "Pilih Kategori Baru:\n";
+    cout << "  1. Akademik\n";
+    cout << "  2. Organisasi\n";
+    cout << "  3. Lain-lain\n";
+    do {
+        cout << "Masukkan nomor kategori: ";
+        cin >> pilihKategori;
+        if (cin.fail() || pilihKategori < 1 || pilihKategori > 3) {
+            cout << "Pilihan tidak valid. Pilih 1, 2, atau 3.\n";
+            cin.clear();
+            cin.ignore(1000, '\n');
+        }
+    } while (cin.fail() || pilihKategori < 1 || pilihKategori > 3);
+
+    if (pilihKategori == 1) t->kategori = "Akademik";
+    else if (pilihKategori == 2) t->kategori = "Organisasi";
+    else t->kategori = "Lain-lain";
+    t->next = nullptr;
+
+    // masukkan kembali node ke queue sesuai prioritas dan deadline baru
+    if (!front || t->prioritas < front->prioritas ||
+        (t->prioritas == front->prioritas && isEarlier(t->deadline, front->deadline))) {
+        t->next = front;
+        front = t;
+    } else {
+        Task* temp = front;
+        while (temp->next &&
+            (temp->next->prioritas < t->prioritas ||
+            (temp->next->prioritas == t->prioritas && !isEarlier(t->deadline, temp->next->deadline)))) {
+            temp = temp->next;
+        }
+        t->next = temp->next;
+        temp->next = t;
+    }
+
     cout << "Tugas berhasil diupdate!\n";
 }
 
