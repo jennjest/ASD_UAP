@@ -221,6 +221,24 @@ void updateTugas() {
     cout << "Tugas berhasil diupdate!\n";
 }
 
+// menyelesaikan tugas paling depan (yang memiliki prioritas tertinggi)
+void selesaikanTugas() {
+    if (!front) {
+        cout << "Tidak ada tugas yang bisa diselesaikan.\n";
+        return;
+    }
+    Task* selesai = front;
+    front = front->next;
+    cout << "Tugas berikut telah diselesaikan:\n";
+    cout << "ID: " << selesai->id << "\n";
+    cout << "Nama: " << selesai->nama << "\n";
+    cout << "Prioritas: " << selesai->prioritas << "\n";
+    cout << "Deadline: " << selesai->deadline << "\n";
+    cout << "Deskripsi: " << selesai->deskripsi << "\n";
+    cout << "Kategori: " << selesai->kategori << "\n";
+    delete selesai;
+}
+
 // menghapus tugas berdasarkan id
 void hapusTugas() {
     cout << "Masukkan ID tugas yang ingin dihapus: ";
@@ -329,10 +347,25 @@ void menu() {
         cout << "3. Update Tugas\n";
         cout << "4. Hapus Tugas\n";
         cout << "5. Cari Tugas\n";
-        cout << "6. Keluar\n";
-        cout << "7. Ekspor ke Excel (CSV)\n";
-        cout << "8. Ekspor ke TXT (Tabel)\n";
-        cout << "Pilih menu: "; cin >> pilih; cin.ignore();
+        cout << "6. Selesaikan Tugas Teratas\n";
+        cout << "7. Keluar\n";
+        cout << "8. Ekspor ke Excel (CSV)\n";
+        cout << "9. Ekspor ke TXT (Tabel)\n";
+        bool validInput = false;
+        do {
+            cout << "Pilih menu: ";
+            cin >> pilih;
+            if (cin.fail()) {
+                cout << "Input harus berupa angka!\n";
+                cin.clear();
+                cin.ignore(1000, '\n');
+            } else if (pilih < 1 || pilih > 9) {
+                cout << "Pilihan tidak valid!\n";
+            } else {
+                validInput = true;
+            }
+        } while (!validInput);
+        cin.ignore();
         // validasi input pilihan menu
         switch (pilih) {
             case 1: tambahTugas(); break;
@@ -340,12 +373,13 @@ void menu() {
             case 3: updateTugas(); break;
             case 4: hapusTugas(); break;
             case 5: cariTugasMenu(); break;
-            case 6: cout << "Keluar...\n"; break;
-            case 7: eksporCSV(); break;
-            case 8: eksporTXT(); break;
+            case 6: selesaikanTugas(); break;
+            case 7: cout << "Keluar...\n"; break;
+            case 8: eksporCSV(); break;
+            case 9: eksporTXT(); break;
             default: cout << "Pilihan tidak valid!\n";
         }
-    } while (pilih != 6);
+    } while (pilih != 7);
 }
 
 // fungsi utama untuk menjalankan program
